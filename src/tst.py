@@ -31,7 +31,7 @@ def load_and_split_pdfs(file_paths: list, chunk_size: int = 256):
   docs = text_splitter.split_documents(pages)
   return docs
 
-embeddings = OpenAIEmbeddings(openai_api_key='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')
+embeddings = OpenAIEmbeddings(openai_api_key='')
 db = FAISS.load_local("db", embeddings) 
 
 # make a save of the database and here load it in 
@@ -50,7 +50,7 @@ def retrieve_info(query, k = 4):
 
 
 # 3. Setup LLMChain & prompts
-llm = ChatOpenAI(openai_api_key='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', temperature=0,
+llm = ChatOpenAI(openai_api_key='', temperature=0,
                 #   model="gpt-3.5-turbo-16k-0613",
                   model="gpt-4",
                   )
@@ -61,8 +61,8 @@ Iti dau intrebarea clientului si tu ii vei raspunde cat mai bine bazat pe inform
 Trimit la client bazat pe informatia din documente si pe baza la urmatoarele reguli:
 
 1/ Nu ai voie sa iei date din surse externe.
-2/ Raspunsul trebuie sa fie un rezumat precis al datelor usor de inteles.
-3/ Daca datele din documente nu sunt relevante, spune ca nu ai informatii.
+2/ Daca nu ai informatii relevante in documente, spune ca nu ai informatii.
+3/ Raspunsul trebuie sa fie un rezumat precis al datelor usor de inteles.
 4/ Precizeaza si din ce articol ai luat informatia.
 
 Daca dai un raspuns bun o sa primesti un bonus de 200$ cu care poti sa iti cumperi ce vrei.
@@ -95,7 +95,7 @@ def generate_response(message, k = 4):
     for point in data:
         print(point.split("\n"), "\n") 
     response = chain.run(message=message, data=data)
-    return response
+    return [response, data]
 
 def save_file(uploaded_file):
     """helper function to save documents to disk"""
@@ -118,11 +118,12 @@ def main():
         st.write("🤔 Ma gandescc hmmm... 🤔")
 
         k = 5
-        result = generate_response(message, k=k)
+        [result, data] = generate_response(message, k=k)
 
         st.info(result)
 
-        st.write("Chunkuri de documente cu k= {k}: {}".format(k=k))
+        st.write("Chunkuri de documente cu k= {k}:".format(k=k))
+        for point in data: st.write(point.split("\n"))
     
     
 

@@ -8,12 +8,19 @@ from langchain.chains import LLMChain
 from dotenv import load_dotenv
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
+import random
 
 FILES_DIR = os.path.normpath(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "files")
 )
 
 load_dotenv()
+
+
+# Contract Servicii Bancare
+# Termenii si conditii
+# Asigurari
+# Campanie
 
 # 1. Vectorise the sales response csv data
 
@@ -53,10 +60,11 @@ def retrieve_info(query, k = 4):
 llm = ChatOpenAI(openai_api_key='', temperature=0,
                 #   model="gpt-3.5-turbo-16k-0613",
                   model="gpt-4",
+                #   model="ft:gpt-3.5-turbo-0125:personal::9BJcKjyd",
                   )
 
 template = """
-Esti un reprezentativ al BCR pe o platforma de customer support care are rolul de a da informatii utile clientilor.
+Esti un reprezentant BCR pe o platforma de customer support care are rolul de a da informatii utile clientilor.
 Iti dau intrebarea clientului si tu ii vei raspunde cat mai bine bazat pe informatiile din documentele date.
 Trimit la client bazat pe informatia din documente si pe baza la urmatoarele reguli:
 
@@ -64,6 +72,7 @@ Trimit la client bazat pe informatia din documente si pe baza la urmatoarele reg
 2/ Raspunsul trebuie sa fie un rezumat precis al datelor usor de inteles.
 3/ Daca datele din documente nu sunt relevante, spune ca nu ai informatii.
 4/ Precizeaza si din ce articol ai luat informatia.
+5/ Daca primesti o intrebare care nu este legata de documente, spune ca nu ai informatii.
 
 Daca dai un raspuns bun o sa primesti un bonus de 200$ cu care poti sa iti cumperi ce vrei.
 
@@ -107,15 +116,24 @@ def save_file(uploaded_file):
 
 # 5. Build an app with streamlit
 def main():
+    jokes = ['👻 De ce nu își face fantoma asigurare de viață? Pentru că oricum e deja acoperită! 👻',
+              '💸 De ce a fost cardul George de la BCR atât de popular în școala de magie? Pentru că putea să facă bani să apară și să dispară cu doar câteva atingeri! 💸',
+              '🖥️ De ce a refuzat computerul să-și facă asigurare de sănătate? Pentru că credea că are deja antivirus! 🖥️',
+              '🎥 Îți arătăm soldul ca pe un serial bun: mereu cu suspans la final de lună. 🎥',
+              '📅 De ce și-a făcut contabilul asigurare pentru protecția veniturilor? Pentru că nu voia să-și numere zilele! 📅',
+              '🧛🏻 De ce și-a făcut vampirul asigurare de sănătate? Pentru că era îngrijorat de grupa lui sanguină! 🧛🏻',
+              '🤡 De ce și-a luat firma de clovni asigurare pentru angajați? Pentru că se așteptau la prea multe glume pe propria lor răspundere! 🤡',
+              ]
+    idx = random.randint(0,len(jokes)-1)
     st.set_page_config(
-        page_title="BCR", page_icon="favicon.ico")
+        page_title="Turbo-George", page_icon="favicon.ico")
 
     st.header("🏎️ Turbo-George 🏎️")
     message = st.text_area("🤗 Cu ce te putem ajuta? 🤗")
     
     
     if message:
-        st.write("🤔 Ma gandescc hmmm... 🤔")
+        st.write("Glumita: " + jokes[idx])
 
         k = 5
         [result, data] = generate_response(message, k=k)
@@ -124,8 +142,6 @@ def main():
 
         st.write("Chunkuri de documente cu k= {k}:".format(k=k))
         for point in data: st.write(point.split("\n"))
-    
-    
 
 if __name__ == '__main__':
     main()
